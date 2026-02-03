@@ -1,123 +1,114 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/Button'
-import { CheckCircle2, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
+import { Play } from 'lucide-react'
 
 export function AboutSection() {
     return (
-        <section className="relative overflow-hidden section-padding bg-brand-bg">
-            {/* Background Topo */}
-            <div className="absolute inset-0 topo-bg opacity-30 pointer-events-none" />
+        <section className="relative overflow-hidden section-padding bg-white dark:bg-dark-navy">
+            {/* Background Pattern - Large Circular Overlay */}
+            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[800px] h-[800px] rounded-full border border-dark-navy/5 dark:border-white/5 pointer-events-none" />
 
             <div className="relative z-10 section-container">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-                    {/* Left: Modern Image Collage */}
-                    <div className="relative order-2 lg:order-1">
-                        <div className="grid grid-cols-2 gap-4 md:gap-8">
-                            <motion.div
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.8 }}
-                                className="space-y-4 md:space-y-8"
-                            >
-                                <div className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-premium aspect-[4/5]">
-                                    <Image
-                                        src="/images/destinations/santorini.jpg"
-                                        alt="Luxury Travel"
-                                        fill
-                                        className="object-cover hover:scale-110 transition-transform duration-1000"
-                                    />
-                                </div>
-                                <div className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-premium aspect-square">
-                                    <Image
-                                        src="/images/destinations/bali.jpg"
-                                        alt="Tropical Paradise"
-                                        fill
-                                        className="object-cover hover:scale-110 transition-transform duration-1000"
-                                    />
-                                </div>
-                            </motion.div>
+                    {/* Left: 4-Image Grid Collage */}
+                    <div className="relative grid grid-cols-2 gap-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="space-y-4"
+                        >
+                            <div className="relative rounded-3xl overflow-hidden aspect-[4/5] shadow-premium">
+                                <Image
+                                    src="/dubai.png"
+                                    alt="Dubai"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="relative rounded-3xl overflow-hidden aspect-square shadow-premium">
+                                <Image
+                                    src="/thailand.png"
+                                    alt="Thailand"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        </motion.div>
 
-                            <motion.div
-                                initial={{ opacity: 0, y: -30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.8, delay: 0.2 }}
-                                className="space-y-4 md:space-y-8 pt-12 md:pt-24"
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                            className="space-y-4 pt-12"
+                        >
+                            <div className="relative rounded-3xl overflow-hidden aspect-square shadow-premium">
+                                <Image
+                                    src="/bali.png"
+                                    alt="Bali"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="relative rounded-3xl overflow-hidden aspect-[4/5] shadow-premium">
+                                <Image
+                                    src="/singapore.png"
+                                    alt="Singapore"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        </motion.div>
+
+                        {/* Play Button Overlay on one image if desired, or just branding */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                className="w-16 h-16 rounded-full bg-coral text-white flex items-center justify-center shadow-mega"
                             >
-                                <div className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-premium aspect-square">
-                                    <Image
-                                        src="/images/destinations/kyoto.jpg"
-                                        alt="Cultural Heritage"
-                                        fill
-                                        className="object-cover hover:scale-110 transition-transform duration-1000"
-                                    />
-                                </div>
-                                <div className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-premium aspect-[4/5]">
-                                    <Image
-                                        src="/images/destinations/swiss-alps.jpg"
-                                        alt="Mountain Adventure"
-                                        fill
-                                        className="object-cover hover:scale-110 transition-transform duration-1000"
-                                    />
-                                </div>
-                            </motion.div>
+                                <Play className="w-6 h-6 fill-white ml-1" />
+                            </motion.button>
                         </div>
                     </div>
 
-                    {/* Right: Modern Typography Content */}
+                    {/* Right: Content */}
                     <motion.div
-                        initial={{ opacity: 0, x: 50 }}
+                        initial={{ opacity: 0, x: 30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 1 }}
-                        className="space-y-8 order-1 lg:order-2"
+                        className="space-y-6"
                     >
-                        <div className="space-y-8">
-                            <div className="inline-flex items-center space-x-4">
-                                <div className="h-[2px] w-12 bg-gold" />
-                                <span className="text-gold font-bold tracking-[0.3em] uppercase text-xs md:text-sm">A Legacy of Travel</span>
-                            </div>
-                            <h2 className="text-brand-text leading-[1.2]">
-                                We Design <span className="text-gold italic">Journeys</span> That Redefine Luxury
+                        <div className="space-y-4">
+                            <h3 className="text-coral font-bold tracking-widest uppercase text-sm">Welcome to our world</h3>
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-dark-navy dark:text-white leading-tight">
+                                We Design <span className="text-coral italic">Journeys</span> That Redefine Luxury
                             </h2>
-                            <p className="text-brand-muted-text text-lg md:text-xl leading-relaxed font-light">
-                                At Happy Journey, we believe travel is an art form. Our curators spend years building relationships with local masters to ensure your experience is nothing short of extraordinary.
+                            <p className="text-brand-muted-text text-lg leading-relaxed max-w-xl">
+                                At HappyJourney, we believe travel is an art form. Our curators spend years building relationships with local masters to ensure your experience is nothing short of extraordinary.
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 py-4">
-                            {[
-                                { title: 'Bespoke Planning', desc: 'Every detail tailored to you.' },
-                                { title: 'Local Immersion', desc: 'Genuine cultural connections.' },
-                                { title: 'Premium Comfort', desc: 'Hand-picked luxury stays.' },
-                                { title: 'Elite Support', desc: '24/7 dedicated assistance.' }
-                            ].map((item, idx) => (
-                                <div key={idx} className="group space-y-3">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-2 h-2 rounded-full bg-gold" />
-                                        <span className="font-bold text-lg text-brand-text group-hover:text-gold transition-colors">{item.title}</span>
-                                    </div>
-                                    <p className="text-sm md:text-base pl-6 text-brand-muted-text font-medium leading-relaxed">{item.desc}</p>
-                                </div>
-                            ))}
+                        <div className="grid grid-cols-2 gap-8 py-4">
+                            <div className="space-y-2 border-l-2 border-coral pl-6">
+                                <h4 className="text-3xl font-bold font-serif text-dark-navy dark:text-white">12K+</h4>
+                                <p className="text-sm font-semibold uppercase tracking-wider text-brand-muted-text">Happy Travelers</p>
+                            </div>
+                            <div className="space-y-2 border-l-2 border-coral pl-6">
+                                <h4 className="text-3xl font-bold font-serif text-dark-navy dark:text-white">500+</h4>
+                                <p className="text-sm font-semibold uppercase tracking-wider text-brand-muted-text">Destinations</p>
+                            </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-8 pt-6 items-start md:items-center">
-                            <Button size="lg" className="px-12 group h-16">
-                                Discover Our Story
-                                <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-2 transition-transform" />
-                            </Button>
-                            <div className="flex items-center space-x-5">
-                                <div className="h-14 w-14 rounded-2xl border-2 border-gold flex items-center justify-center rotate-12 bg-gold/5">
-                                    <span className="text-gold font-bold text-lg">HJ</span>
-                                </div>
-                                <p className="text-xs md:text-sm font-bold uppercase tracking-widest text-brand-muted-text leading-tight">Partnered with<br />Global Luxury</p>
-                            </div>
+                        <div className="pt-4">
+                            <button className="gradient-green text-white px-10 py-4 rounded-full font-bold text-sm tracking-widest uppercase hover:shadow-premium transition-all">
+                                Discover More
+                            </button>
                         </div>
                     </motion.div>
                 </div>

@@ -1,130 +1,149 @@
 'use client'
 
+import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import Link from 'next/link'
-import { ArrowUpRight, Calendar, User, MoveRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
-const journeys = [
+// Fallback data
+const initialJourneys = [
     {
-        id: 1,
         title: 'Serbian Explorer',
-        excerpt: 'An immersive cultural odyssey through the historic heart of the Balkans, exploring ancient architecture and local traditions.',
-        image: '/images/destinations/iceland.jpg',
-        date: 'Dec 2024',
-        author: 'Elena Rossi'
+        tagline: 'Culture • Heritage',
+        description: 'An immersive cultural odyssey through the historic heart of the Balkans, exploring ancient architecture and local traditions.',
+        image_url: '/bali.png',
     },
     {
-        id: 2,
         title: 'Maldives Paradise',
-        excerpt: 'Discovering the ultimate relaxation in turquoise waters, featuring luxury overwater villas and vibrant coral reef adventures.',
-        image: '/images/destinations/bali.jpg',
-        date: 'Nov 2024',
-        author: 'Mark Sterling'
+        tagline: 'Luxury • Beach',
+        description: 'Discovering the ultimate relaxation in turquoise waters, featuring luxury overwater villas and vibrant coral reef adventures.',
+        image_url: '/maldives.png',
     },
     {
-        id: 3,
         title: 'Dubai Desert Safari',
-        excerpt: 'Thrilling adventures across the golden dunes, combining luxury desert camping with authentic Bedouin cultural hospitality.',
-        image: '/images/hero-bg.jpg',
-        date: 'Oct 2024',
-        author: 'Sarah Jenkins'
+        tagline: 'Adventure • Desert',
+        description: 'Thrilling adventures across the golden dunes, combining luxury desert camping with authentic Bedouin cultural hospitality.',
+        image_url: '/dubai.png',
     }
 ]
 
 export function CompletedJourneys() {
-    return (
-        <section className="section-padding bg-brand-muted relative overflow-hidden">
-            {/* Background Topo */}
-            <div className="absolute inset-0 topo-bg opacity-40 pointer-events-none" />
+    const [journeys, setJourneys] = useState(initialJourneys)
+    const [loading, setLoading] = useState(true)
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
+    const supabase = createClient()
 
-            <div className="relative z-10 section-container">
-                {/* Section Header */}
-                <div className="max-w-3xl mb-24 space-y-6">
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="flex items-center space-x-4 mb-4"
-                    >
-                        <div className="h-[2px] w-12 bg-gold" />
-                        <span className="text-gold font-bold tracking-[0.3em] uppercase text-xs md:text-sm">
-                            Travel Diaries
-                        </span>
-                    </motion.div>
-                    <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="text-brand-text"
-                    >
-                        Memories From <span className="text-gold italic">Completed Journeys</span>
-                    </motion.h2>
+    useEffect(() => {
+        async function fetchJourneys() {
+            try {
+                const { data, error } = await supabase
+                    .from('completed_journeys')
+                    .select('*')
+                    .order('order_index', { ascending: true })
+
+                if (data && data.length > 0) {
+                    setJourneys(data)
+                }
+            } catch (err) {
+                console.error('Error fetching journeys:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchJourneys()
+    }, [])
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (scrollContainerRef.current) {
+            const scrollAmount = 400
+            scrollContainerRef.current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            })
+        }
+    }
+
+    return (
+        <section className="section-padding bg-white dark:bg-dark-navy relative overflow-hidden">
+            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] rounded-full border border-dark-navy/5 dark:border-white/5 pointer-events-none" />
+
+            <div className="section-container relative z-10">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
+                    <div className="max-w-2xl">
+                        <h3 className="text-coral font-bold tracking-widest uppercase text-sm mb-4">Travel Diaries</h3>
+                        <h2 className="text-4xl md:text-5xl font-serif font-bold text-dark-navy dark:text-white">
+                            Memories from <br /> Completed Journeys
+                        </h2>
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                        <button
+                            onClick={() => scroll('left')}
+                            className="p-4 rounded-full border border-dark-navy/10 dark:border-white/10 hover:bg-coral hover:text-white hover:border-coral transition-all duration-300 group"
+                        >
+                            <ChevronLeft className="w-6 h-6" />
+                        </button>
+                        <button
+                            onClick={() => scroll('right')}
+                            className="p-4 rounded-full border border-dark-navy/10 dark:border-white/10 hover:bg-coral hover:text-white hover:border-coral transition-all duration-300 group"
+                        >
+                            <ChevronRight className="w-6 h-6" />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Journeys List */}
-                <div className="space-y-32 md:space-y-48">
-                    {journeys.map((journey, idx) => (
+                <div
+                    ref={scrollContainerRef}
+                    className="flex overflow-x-auto gap-8 pb-12 snap-x snap-mandatory scrollbar-hide no-scrollbar"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                    {journeys.map((journey, index) => (
                         <motion.div
-                            key={journey.id}
-                            initial={{ opacity: 0, y: 50 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: '-100px' }}
-                            transition={{ duration: 0.8 }}
-                            className={`flex flex-col ${idx % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-12 lg:gap-24 items-center`}
+                            key={journey.title}
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6, delay: index * 0.1 }}
+                            className="flex-shrink-0 w-[300px] md:w-[450px] snap-start"
                         >
-                            {/* Image Side */}
-                            <div className="w-full lg:w-1/2 group">
-                                <div className="relative aspect-[16/10] overflow-hidden rounded-[2.5rem] md:rounded-[4rem] shadow-mega">
+                            <div className="group relative">
+                                <div className="relative aspect-[16/10] rounded-[2rem] overflow-hidden shadow-premium mb-8 transform group-hover:scale-[1.02] transition-transform duration-500">
                                     <Image
-                                        src={journey.image}
+                                        src={journey.image_url || '/dubai.png'}
                                         alt={journey.title}
                                         fill
-                                        className="object-cover transition-transform duration-[2.5s] ease-out group-hover:scale-110"
+                                        className="object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-1000" />
-                                </div>
-                            </div>
-
-                            {/* Content Side */}
-                            <div className="w-full lg:w-1/2 space-y-8 lg:px-6">
-                                <div className="flex flex-wrap items-center gap-6 text-xs font-bold tracking-[0.2em] uppercase text-brand-muted-text">
-                                    <div className="flex items-center space-x-3">
-                                        <Calendar className="w-4 h-4 text-gold" />
-                                        <span>{journey.date}</span>
-                                    </div>
-                                    <div className="w-1 h-1 rounded-full bg-gold/50" />
-                                    <div className="flex items-center space-x-3">
-                                        <User className="w-4 h-4 text-gold" />
-                                        <span>{journey.author}</span>
-                                    </div>
+                                    <div className="absolute inset-0 bg-dark-navy/20 group-hover:bg-dark-navy/40 transition-colors duration-500" />
                                 </div>
 
-                                <div className="space-y-6">
-                                    <h3 className="text-3xl lg:text-5xl font-heading font-bold text-brand-text transition-colors group-hover:text-gold">
+                                <div className="space-y-4 px-2">
+                                    <span className="text-coral font-bold tracking-[0.2em] uppercase text-xs">
+                                        {journey.tagline}
+                                    </span>
+                                    <h3 className="text-2xl md:text-3xl font-serif font-bold text-dark-navy dark:text-white group-hover:text-coral transition-colors">
                                         {journey.title}
                                     </h3>
-                                    <p className="text-brand-muted-text text-lg md:text-xl leading-relaxed font-light">
-                                        {journey.excerpt}
+                                    <p className="text-brand-muted-text text-base leading-relaxed line-clamp-3">
+                                        {journey.description}
                                     </p>
-                                </div>
-
-                                <div className="pt-6">
-                                    <Link href={`/blog/${journey.id}`} className="group inline-flex items-center space-x-6">
-                                        <span className="text-xs md:text-sm font-bold tracking-[0.2em] uppercase text-brand-text">
-                                            Read Full Story
-                                        </span>
-                                        <div className="w-14 h-14 rounded-full bg-brand-bg shadow-premium flex items-center justify-center group-hover:bg-gold group-hover:text-navy transition-all duration-500">
-                                            <MoveRight className="w-6 h-6 transform group-hover:translate-x-1 transition-transform" />
-                                        </div>
-                                    </Link>
+                                    <button className="inline-flex items-center space-x-3 text-dark-navy dark:text-white font-bold tracking-widest uppercase text-xs hover:text-coral transition-colors pt-2 group/btn">
+                                        <span>Read Full Story</span>
+                                        <div className="w-8 h-[2px] bg-coral group-hover/btn:w-12 transition-all" />
+                                    </button>
                                 </div>
                             </div>
                         </motion.div>
                     ))}
                 </div>
             </div>
+
+            <style jsx>{`
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+            `}</style>
         </section>
     )
 }
