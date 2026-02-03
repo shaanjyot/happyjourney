@@ -1,18 +1,22 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
     try {
-        const { query } = await req.json();
+        const apiKey = process.env.GEMINI_API_KEY;
 
-        if (!process.env.GEMINI_API_KEY) {
+        if (!apiKey) {
             console.error('GEMINI_API_KEY is missing');
             return NextResponse.json({
                 error: 'Gemini API Key not configured. Please add GEMINI_API_KEY to your .env.local'
             }, { status: 500 });
         }
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const { query } = await req.json();
 
         // Use verified model from the environment diagnostics
         const model = genAI.getGenerativeModel({
@@ -36,6 +40,7 @@ export async function POST(req: Request) {
             console.error('Gemini call failed inside:', err);
             throw err;
         });
+
         const response = await result.response;
         let text = response.text();
 
