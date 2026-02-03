@@ -33,11 +33,27 @@ export default async function AdminLayout({
             </nav>
             <div className="max-w-7xl mx-auto px-4 py-12">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    <aside className="lg:col-span-1 space-y-1">
-                        <a href="/admin" className="block px-4 py-2 text-sm font-medium rounded-lg bg-coral text-white">Dashboard</a>
-                        <a href="/admin/destinations" className="block px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-white/5">Destinations</a>
-                        <a href="/admin/journeys" className="block px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-white/5">Travel Diaries</a>
-                        <a href="/admin/content" className="block px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-white/5">Site Content</a>
+                    <aside className="lg:col-span-1 space-y-2">
+                        {[
+                            { title: 'Dashboard', href: '/admin' },
+                            { title: 'Destinations', href: '/admin/destinations' },
+                            { title: 'Travel Diaries', href: '/admin/journeys' },
+                            { title: 'Inquiries', href: '/admin/inquiries' },
+                            { title: 'Site Content', href: '/admin/content' },
+                        ].map((item) => (
+                            <a
+                                key={item.title}
+                                href={item.href}
+                                className="block px-6 py-3 text-sm font-bold uppercase tracking-widest rounded-2xl transition-all hover:bg-coral/10 hover:text-coral"
+                            >
+                                {item.title}
+                            </a>
+                        ))}
+                        <div className="pt-8 border-t border-gray-100 dark:border-white/10 mt-8">
+                            <a href="/" className="block px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-muted-text hover:text-coral">
+                                View Live Site
+                            </a>
+                        </div>
                     </aside>
                     <main className="lg:col-span-3">
                         {children}
