@@ -68,13 +68,13 @@ export function TestimonialsSection() {
                         viewport={{ once: true }}
                         className="space-y-2"
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-brand-text">
+                        <h2 className="text-4xl md:text-5xl font-bold text-coral dark:text-white">
                             HappyJourney's Postcard
                         </h2>
                         <p className="text-xl text-coral font-semibold">
                             A message from the heart ❤️
                         </p>
-                        <p className="text-brand-muted-text text-lg max-w-2xl mx-auto">
+                        <p className="text-brand-muted-text dark:text-white/80 text-lg max-w-2xl mx-auto">
                             See what our travelers are saying about their unforgettable experiences
                         </p>
                     </motion.div>

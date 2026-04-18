@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight, MapPin, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
+import { getTripRouteFromDestination } from '@/lib/trips-data'
 
 const initialDestinations = [
     {
@@ -14,7 +15,7 @@ const initialDestinations = [
         image_url: '/dubai.png',
         duration: '5 Days / 4 Nights',
         price: 'From ₹45,000',
-        href: '/trips/dubai',
+        href: '/trips/destination/dubai',
         description: 'Experience luxury and adventure in the city of gold'
     },
     {
@@ -23,7 +24,7 @@ const initialDestinations = [
         image_url: '/bali.png',
         duration: '6 Days / 5 Nights',
         price: 'From ₹38,000',
-        href: '/trips/bali',
+        href: '/trips/destination/bali',
         description: 'Tropical paradise with stunning rice terraces and beaches'
     },
     {
@@ -32,8 +33,35 @@ const initialDestinations = [
         image_url: '/thailand.png',
         duration: '7 Days / 6 Nights',
         price: 'From ₹32,000',
-        href: '/trips/thailand',
+        href: '/trips/destination/thailand',
         description: 'Crystal clear waters and limestone cliffs await'
+    },
+    {
+        name: 'SINGAPORE',
+        country: 'Singapore',
+        image_url: '/singapore.png',
+        duration: '5 Days / 4 Nights',
+        price: 'From ₹45,500',
+        href: '/trips/destination/singapore',
+        description: 'Skyline views, attractions, and modern city escapes'
+    },
+    {
+        name: 'MALDIVES',
+        country: 'Indian Ocean',
+        image_url: '/maldives.png',
+        duration: '5 Days / 4 Nights',
+        price: 'From ₹65,000',
+        href: '/trips/destination/maldives',
+        description: 'Luxury overwater stays and turquoise island serenity'
+    },
+    {
+        name: 'VIETNAM',
+        country: 'Southeast Asia',
+        image_url: '/thailand.png',
+        duration: '7 Days / 6 Nights',
+        price: 'From ₹24,200',
+        href: '/trips/destination/vietnam',
+        description: 'Culture-rich cities, coastlines, and food trails'
     }
 ]
 
@@ -78,10 +106,10 @@ export function PopularDestinations() {
             <div className="section-container">
                 <div className="flex items-center justify-between mb-8">
                     <div className="space-y-3">
-                        <h2 className="text-4xl md:text-5xl font-bold text-brand-text">
+                        <h2 className="text-4xl md:text-5xl font-bold text-coral dark:text-white">
                             Popular Destinations
                         </h2>
-                        <p className="text-brand-muted-text text-lg">
+                        <p className="text-brand-muted-text dark:text-white/80 text-lg">
                             Handpicked Getaways Loved by Thousands
                         </p>
                     </div>
@@ -108,7 +136,9 @@ export function PopularDestinations() {
                         className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory scrollbar-hide no-scrollbar"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
-                        {destinations.map((destination, index) => (
+                        {destinations.map((destination, index) => {
+                            const destinationPath = getTripRouteFromDestination(destination.href || destination.name)
+                            return (
                             <motion.div
                                 key={destination.name}
                                 initial={{ opacity: 0, y: 20 }}
@@ -117,9 +147,9 @@ export function PopularDestinations() {
                                 viewport={{ once: true }}
                                 className="flex-shrink-0 w-[320px] md:w-[380px] snap-start"
                             >
-                                <Link href={destination.href || '#'} className="group block">
-                                    <div className="card-shadow rounded-2xl overflow-hidden bg-white dark:bg-dark-navy/50 transition-all duration-300">
-                                        <div className="relative h-64 overflow-hidden">
+                                <Link href={destinationPath} className="group block">
+                                    <div className="rounded-2xl overflow-hidden bg-white dark:bg-dark-navy/50 transition-all duration-300 shadow-[0_14px_35px_-14px_rgba(0,0,0,0.35)] hover:shadow-[0_20px_45px_-18px_rgba(0,0,0,0.45)] border border-white/40 dark:border-white/10">
+                                        <div className="relative h-64 overflow-hidden paint-dissolve-frame">
                                             <Image
                                                 src={destination.image_url || '/dubai.png'}
                                                 alt={destination.name}
@@ -155,21 +185,22 @@ export function PopularDestinations() {
                                                 </div>
                                             </div>
 
-                                            <button className="w-full gradient-green text-white py-3 rounded-full font-bold text-sm hover:shadow-premium transition-all">
+                                            <span className="block text-center w-full gradient-green text-white py-3 rounded-full font-bold text-sm hover:shadow-premium transition-all">
                                                 View Packages
-                                            </button>
+                                            </span>
                                         </div>
                                     </div>
                                 </Link>
                             </motion.div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </div>
 
                 <div className="text-center mt-12">
                     <Link
                         href="/trips"
-                        className="inline-flex items-center space-x-2 text-brand-text hover:text-coral transition-colors font-bold text-sm tracking-wider uppercase"
+                        className="inline-flex items-center space-x-2 text-coral dark:text-white hover:text-brand-text dark:hover:text-coral transition-colors font-bold text-sm tracking-wider uppercase"
                     >
                         <span>View All Destinations</span>
                         <ChevronRight className="w-5 h-5" />
@@ -180,6 +211,35 @@ export function PopularDestinations() {
             <style jsx>{`
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;
+                }
+
+                .paint-dissolve-frame::before {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                    z-index: 10;
+                    background:
+                        radial-gradient(25px 14px at 8% 6%, rgba(255, 255, 255, 0.72), transparent 70%),
+                        radial-gradient(30px 16px at 94% 10%, rgba(255, 255, 255, 0.65), transparent 72%),
+                        radial-gradient(26px 14px at 9% 92%, rgba(255, 255, 255, 0.62), transparent 70%),
+                        radial-gradient(32px 16px at 92% 88%, rgba(255, 255, 255, 0.68), transparent 72%),
+                        radial-gradient(110% 22% at 50% -6%, rgba(255, 255, 255, 0.45), transparent 68%),
+                        radial-gradient(110% 22% at 50% 106%, rgba(255, 255, 255, 0.4), transparent 68%);
+                    mix-blend-mode: screen;
+                    opacity: 0.85;
+                }
+
+                :global(.dark) .paint-dissolve-frame::before {
+                    background:
+                        radial-gradient(25px 14px at 8% 6%, rgba(11, 20, 33, 0.65), transparent 70%),
+                        radial-gradient(30px 16px at 94% 10%, rgba(11, 20, 33, 0.58), transparent 72%),
+                        radial-gradient(26px 14px at 9% 92%, rgba(11, 20, 33, 0.52), transparent 70%),
+                        radial-gradient(32px 16px at 92% 88%, rgba(11, 20, 33, 0.62), transparent 72%),
+                        radial-gradient(110% 22% at 50% -6%, rgba(11, 20, 33, 0.45), transparent 68%),
+                        radial-gradient(110% 22% at 50% 106%, rgba(11, 20, 33, 0.42), transparent 68%);
+                    mix-blend-mode: multiply;
+                    opacity: 0.78;
                 }
             `}</style>
         </section>

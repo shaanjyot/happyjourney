@@ -10,10 +10,11 @@ import { WhyChooseUs } from '@/components/sections/WhyChooseUs'
 import { CompletedJourneys } from '@/components/sections/CompletedJourneys'
 import { CTASection } from '@/components/sections/CTASection'
 import { PartnersSection } from '@/components/sections/PartnersSection'
+import { BlogSection } from '@/components/sections/BlogSection'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white dark:bg-dark-navy">
+    <main className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-[#071424] dark:via-[#0d223a] dark:to-[#14304e]">
       <Header />
       <HeroSection />
       <PopularDestinations />
@@ -22,6 +23,7 @@ export default function Home() {
       <ServicesSection />
       <CompletedJourneys />
       <WhyChooseUs />
+      <BlogSection />
       <TestimonialsSection />
       <PartnersSection />
       <CTASection />

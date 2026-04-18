@@ -17,12 +17,12 @@ const crimsonPro = Crimson_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "HappyJourney - Premium International Travel Experiences",
+  title: "Happy Journey - Premium International Travel Experiences",
   description: "Discover extraordinary travel experiences around the world. From cultural tours to adventure expeditions, HappyJourney creates unforgettable memories for families and explorers.",
   keywords: "travel, international travel, family travel, cultural tours, adventure travel, premium travel experiences",
-  authors: [{ name: "HappyJourney" }],
+  authors: [{ name: "Happy Journey" }],
   openGraph: {
-    title: "HappyJourney - Premium International Travel Experiences",
+    title: "Happy Journey - Premium International Travel Experiences",
     description: "Discover extraordinary travel experiences around the world",
     type: "website",
   },

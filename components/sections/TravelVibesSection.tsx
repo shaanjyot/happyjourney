@@ -68,10 +68,10 @@ export function TravelVibesSection() {
                         viewport={{ once: true }}
                         className="space-y-3"
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-brand-text">
+                        <h2 className="text-4xl md:text-5xl font-bold text-coral dark:text-white">
                             Pick Your Travel Vibe
                         </h2>
-                        <p className="text-brand-muted-text text-lg max-w-2xl mx-auto">
+                        <p className="text-brand-muted-text dark:text-white/80 text-lg max-w-2xl mx-auto">
                             Whether you seek adventure, relaxation, or romance, we have the perfect journey for you
                         </p>
                     </motion.div>

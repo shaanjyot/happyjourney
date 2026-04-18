@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Sun, Moon, Search, ChevronDown, MapPin, Globe, Compass, Phone, User, LogIn, LogOut, Mail, Lock } from 'lucide-react'
+import { Menu, X, Sun, Moon, ChevronDown, MapPin, Globe, Compass, Phone, User, LogOut, Mail, Lock } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Logo } from '@/components/ui/Logo'
@@ -13,13 +14,13 @@ import { User as SupabaseUser } from '@supabase/supabase-js'
 const navigation = [
     {
         name: 'Popular Destinations',
-        href: '#',
+        href: '/trips',
         dropdown: [
-            { name: 'Dubai', href: '/trips/dubai' },
-            { name: 'Bali', href: '/trips/bali' },
-            { name: 'Thailand', href: '/trips/thailand' },
-            { name: 'Maldives', href: '/trips/maldives' },
-            { name: 'Singapore', href: '/trips/singapore' },
+            { name: 'Dubai', href: '/trips/destination/dubai' },
+            { name: 'Bali', href: '/trips/destination/bali' },
+            { name: 'Thailand', href: '/trips/destination/thailand' },
+            { name: 'Maldives', href: '/trips/destination/maldives' },
+            { name: 'Singapore', href: '/trips/destination/singapore' },
         ]
     },
     {
@@ -30,58 +31,71 @@ const navigation = [
                 title: 'South East Asia',
                 icon: MapPin,
                 items: [
-                    { name: 'Bali Paradise', href: '/trips/bali' },
-                    { name: 'Thailand Beaches', href: '/trips/thailand' },
-                    { name: 'Singapore City', href: '/trips/singapore' },
-                    { name: 'Vietnam Culture', href: '/trips/vietnam' },
+                    { name: 'Bali Paradise', href: '/trips/destination/bali' },
+                    { name: 'Thailand Beaches', href: '/trips/destination/thailand' },
+                    { name: 'Singapore City', href: '/trips/destination/singapore' },
+                    { name: 'Vietnam Culture', href: '/trips/destination/vietnam' },
                 ]
             },
             {
                 title: 'Europe',
                 icon: Globe,
                 items: [
-                    { name: 'Swiss Alps', href: '/trips/swiss' },
-                    { name: 'Paris Romance', href: '/trips/paris' },
-                    { name: 'Italy Heritage', href: '/trips/italy' },
-                    { name: 'Amsterdam Canals', href: '/trips/amsterdam' },
+                    { name: 'Swiss Alps', href: '/trips/destination/swiss' },
+                    { name: 'Paris Romance', href: '/trips/destination/paris' },
+                    { name: 'Italy Heritage', href: '/trips/destination/italy' },
+                    { name: 'Amsterdam Canals', href: '/trips/destination/amsterdam' },
                 ]
             },
             {
                 title: 'Middle East',
                 icon: Compass,
                 items: [
-                    { name: 'Dubai Luxury', href: '/trips/dubai' },
-                    { name: 'Abu Dhabi', href: '/trips/abudhabi' },
-                    { name: 'Egypt Pyramids', href: '/trips/egypt' },
-                    { name: 'Turkey Historic', href: '/trips/turkey' },
+                    { name: 'Dubai Luxury', href: '/trips/destination/dubai' },
+                    { name: 'Abu Dhabi', href: '/trips/destination/abudhabi' },
+                    { name: 'Egypt Pyramids', href: '/trips/destination/egypt' },
+                    { name: 'Turkey Historic', href: '/trips/destination/turkey' },
                 ]
             }
         ]
     },
     {
         name: 'Domestic Tours',
-        href: '/domestic',
+        href: '/trips',
         dropdown: [
-            { name: 'Incredible India', href: '/domestic/india' },
-            { name: 'Himalayas', href: '/domestic/himalayas' },
-            { name: 'Kerala Backwaters', href: '/domestic/kerala' },
-            { name: 'Rajasthan Heritage', href: '/domestic/rajasthan' },
+            { name: 'Incredible India', href: '/trips/destination/india' },
+            { name: 'Himalayas', href: '/trips/destination/himachal' },
+            { name: 'North East India', href: '/trips/destination/assam' },
+            { name: 'South India', href: '/trips/destination/south-india' },
         ]
     },
     {
         name: 'Packages by Season',
-        href: '/seasonal',
+        href: '/trips',
         dropdown: [
-            { name: 'Summer Escapes', href: '/seasonal/summer' },
-            { name: 'Winter Wonderland', href: '/seasonal/winter' },
-            { name: 'Monsoon Magic', href: '/seasonal/monsoon' },
-            { name: 'Festive Specials', href: '/seasonal/festive' },
+            { name: 'Summer Escapes', href: '/trips?category=Summer%20Escapes' },
+            { name: 'Winter Wonderland', href: '/trips?category=Winter%20Wonderland' },
+            { name: 'Monsoon Magic', href: '/trips?category=Monsoon%20Magic' },
+            { name: 'Festive Specials', href: '/trips?category=Festive%20Specials' },
         ]
     },
     { name: 'About Us', href: '/about' },
     { name: 'Blog', href: '/blog' },
     { name: 'Contact Us', href: '/contact' },
 ]
+
+const menuPromo = {
+    popular: {
+        title: 'Featured Escape',
+        subtitle: 'Dubai Skyline Nights',
+        image: '/dubai.png'
+    },
+    domestic: {
+        title: 'Explore India',
+        subtitle: 'Mountains, coast & culture',
+        image: '/thailand.png'
+    }
+}
 
 export function Header() {
     const [isScrolled, setIsScrolled] = useState(false)
@@ -90,14 +104,12 @@ export function Header() {
     const [showPhone, setShowPhone] = useState(false)
     const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null)
     const [user, setUser] = useState<SupabaseUser | null>(null)
-    const { theme, setTheme } = useTheme()
-    const [mounted, setMounted] = useState(false)
+    const { resolvedTheme, setTheme } = useTheme()
     const pathname = usePathname()
     const headerRef = useRef<HTMLElement>(null)
     const supabase = createClient()
 
     useEffect(() => {
-        setMounted(true)
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50)
         }
@@ -141,13 +153,13 @@ export function Header() {
                 }`}
             onMouseLeave={() => setActiveMegaMenu(null)}
         >
-            <nav className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 h-20 flex items-center">
+            <nav className="w-full px-4 sm:px-8 lg:px-12 h-20 flex items-center">
                 {/* Logo Area */}
                 <div className="flex-1 flex justify-start">
                     <Link href="/" className="flex items-center space-x-3 group min-w-fit">
                         <Logo className="h-10 w-10 md:h-11 md:w-11 transition-transform duration-500 group-hover:rotate-[15deg]" />
                         <span className="text-xl md:text-2xl font-heading font-bold tracking-tight text-white whitespace-nowrap">
-                            Happy<span className="text-coral">Journey</span>
+                            Happy <span className="text-coral">Journey</span>
                         </span>
                     </Link>
                 </div>
@@ -175,20 +187,41 @@ export function Header() {
                                         initial={{ opacity: 0, y: 15 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: 10 }}
-                                        className="absolute top-full left-0 mt-2 bg-white dark:bg-dark-navy shadow-mega rounded-xl p-3 min-w-[220px] overflow-hidden border border-white/10"
+                                        className="absolute top-full left-0 mt-2 bg-white dark:bg-dark-navy shadow-mega rounded-xl p-3 min-w-[320px] overflow-hidden border border-white/10"
                                     >
-                                        <ul className="space-y-1">
-                                            {item.dropdown.map((subItem) => (
-                                                <li key={subItem.name}>
-                                                    <Link
-                                                        href={subItem.href}
-                                                        className="block px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-coral/10 hover:text-coral rounded-lg transition-all"
-                                                    >
-                                                        {subItem.name}
-                                                    </Link>
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        <div className="space-y-3">
+                                            <ul className="space-y-1">
+                                                {item.dropdown.map((subItem) => (
+                                                    <li key={subItem.name}>
+                                                        <Link
+                                                            href={subItem.href}
+                                                            className="block px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-coral/10 hover:text-coral rounded-lg transition-all"
+                                                        >
+                                                            {subItem.name}
+                                                        </Link>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            {(item.name === 'Popular Destinations' || item.name === 'Domestic Tours') && (
+                                                <div className="relative h-28 rounded-xl overflow-hidden border border-white/10">
+                                                    <Image
+                                                        src={item.name === 'Popular Destinations' ? menuPromo.popular.image : menuPromo.domestic.image}
+                                                        alt="menu promo"
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-dark-navy/75 via-dark-navy/40 to-transparent" />
+                                                    <div className="absolute left-3 bottom-3">
+                                                        <p className="text-[10px] uppercase tracking-widest text-white/70">
+                                                            {item.name === 'Popular Destinations' ? menuPromo.popular.title : menuPromo.domestic.title}
+                                                        </p>
+                                                        <p className="text-sm font-bold text-white">
+                                                            {item.name === 'Popular Destinations' ? menuPromo.popular.subtitle : menuPromo.domestic.subtitle}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -207,6 +240,16 @@ export function Header() {
 
                 {/* Action Controls - Right Aligned */}
                 <div className="flex-1 flex justify-end items-center space-x-1 md:space-x-3">
+                    {/* Theme Toggle */}
+                    <button
+                        onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                        className="p-2.5 rounded-full hover:bg-white/10 text-white transition-all"
+                        aria-label="Toggle theme"
+                    >
+                        <Sun className="hidden w-5 h-5 dark:block" />
+                        <Moon className="w-5 h-5 dark:hidden" />
+                    </button>
+
                     {/* Phone Icon/Number Toggle - Universal */}
                     <div className="relative">
                         <button
@@ -261,7 +304,7 @@ export function Header() {
                     {/* Mobile Menu Trigger */}
                     <button
                         onClick={() => setIsMobileMenuOpen(true)}
-                        className="lg:hidden p-2.5 rounded-full hover:bg-white/10 text-white transition-all"
+                        className="lg:hidden relative z-[10001] p-2.5 rounded-full hover:bg-white/10 text-white transition-all"
                     >
                         <Menu className="w-6 h-6" />
                     </button>
@@ -278,7 +321,7 @@ export function Header() {
                         transition={{ duration: 0.3 }}
                         className="absolute left-0 right-0 top-full bg-white dark:bg-dark-navy shadow-mega border-t border-gray-100 dark:border-white/10 py-12 z-40"
                     >
-                        <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
+                        <div className="w-full px-8 grid grid-cols-1 md:grid-cols-4 gap-10">
                             {navigation.find(n => n.name === activeMegaMenu)?.mega?.map((group) => {
                                 const Icon = group.icon
                                 return (
@@ -303,6 +346,24 @@ export function Header() {
                                     </div>
                                 )
                             })}
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-bold tracking-wider uppercase text-coral">Destination Highlights</h4>
+                                <div className="space-y-3">
+                                    {[
+                                        { name: 'Dubai', image: '/dubai.png', href: '/trips/destination/dubai' },
+                                        { name: 'Bali', image: '/bali.png', href: '/trips/destination/bali' },
+                                        { name: 'Thailand', image: '/thailand.png', href: '/trips/destination/thailand' },
+                                    ].map((card) => (
+                                        <Link key={card.name} href={card.href} className="group block">
+                                            <div className="relative h-20 rounded-xl overflow-hidden border border-white/10">
+                                                <Image src={card.image} alt={card.name} fill className="object-cover group-hover:scale-105 transition-transform" />
+                                                <div className="absolute inset-0 bg-gradient-to-r from-dark-navy/75 to-transparent" />
+                                                <p className="absolute left-3 bottom-2 text-white text-sm font-bold">{card.name}</p>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </motion.div>
                 )}
@@ -427,7 +488,7 @@ export function Header() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed inset-0 z-[150] bg-white dark:bg-dark-navy lg:hidden overflow-y-auto"
+                        className="fixed inset-0 z-[10000] bg-gradient-to-b from-white via-[#f7f9fc] to-[#eef4fb] dark:from-dark-navy dark:via-[#071727] dark:to-[#0b2137] backdrop-blur-xl lg:hidden overflow-y-auto shadow-[0_40px_120px_-20px_rgba(0,0,0,0.75)]"
                     >
                         <div className="flex flex-col min-h-full p-8 pt-24">
                             <div className="flex-1 space-y-8">

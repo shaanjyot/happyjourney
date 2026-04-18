@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { ChevronDown, Globe, Sunrise, Map, Palmtree, TowerControl, Search, X, Loader2, Calendar, Star, MapPin, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getTripRouteFromDestination } from '@/lib/trips-data'
 
 const heroImages = [
     '/hero-bg.png',
@@ -18,7 +19,7 @@ export function HeroSection() {
     const [currentImage, setCurrentImage] = useState(0)
     const [content, setContent] = useState({
         title: 'WELCOME TO',
-        subtitle: 'HAPPY',
+        subtitle: 'HAPPY ',
         description: 'Discover the Wonders Next Door – Explore, Experience, Embrace the World'
     })
     const router = useRouter()
@@ -100,7 +101,7 @@ export function HeroSection() {
     }
 
     return (
-        <section className="relative min-h-screen flex items-center justify-center pt-20 bg-dark-navy z-10">
+        <section className="relative min-h-[82vh] md:min-h-[86vh] flex items-center justify-center pt-20 bg-dark-navy z-10">
             {/* Background Slider */}
             <div className="absolute inset-0 z-0 overflow-hidden">
                 <AnimatePresence mode="wait">
@@ -226,7 +227,7 @@ export function HeroSection() {
                         <Button
                             size="lg"
                             variant="outline"
-                            className="gradient-yellow border-0 text-dark-navy rounded-full px-8 py-6 text-base font-bold hover:shadow-premium transition-all"
+                            className="bg-coral border-2 border-coral text-white rounded-full px-8 py-6 text-base font-bold hover:bg-[#ff7a62] hover:border-[#ff7a62] transition-all"
                             onClick={() => router.push('/contact')}
                         >
                             Planning a Trip?
@@ -252,7 +253,7 @@ export function HeroSection() {
                             return (
                                 <button
                                     key={item.name}
-                                    onClick={() => router.push(`/trips/${item.name.toLowerCase()}`)}
+                                    onClick={() => router.push(getTripRouteFromDestination(item.name))}
                                     className="group flex items-center space-x-2 px-5 py-2.5 rounded-full border border-white/30 text-white/90 text-xs font-semibold hover:bg-coral hover:text-white hover:border-coral transition-all duration-300 backdrop-blur-md"
                                 >
                                     <Icon className="w-3.5 h-3.5 text-coral group-hover:text-white transition-colors" />

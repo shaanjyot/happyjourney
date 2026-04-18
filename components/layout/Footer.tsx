@@ -34,13 +34,17 @@ export function Footer() {
         <footer className="bg-dark-navy text-white relative overflow-hidden">
             {/* Topographic Background Overlay */}
             <div className="absolute inset-0 topo-bg opacity-10 pointer-events-none" />
+            <div className="cityscape-layer" aria-hidden="true">
+                <div className="cityscape-strip" />
+                <div className="cityscape-strip secondary" />
+            </div>
 
             {/* Newsletter / Upper Part */}
             <div className="border-b border-white/10 relative z-10">
                 <div className="section-container py-12 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="space-y-2">
                         <h3 className="text-2xl font-serif font-bold italic text-coral">Ready to start your journey?</h3>
-                        <p className="text-gray-400 text-sm">Subscribe to get the latest travel updates and exclusive offers.</p>
+                        <p className="text-white/70 text-sm">Subscribe to get the latest travel updates and exclusive offers.</p>
                     </div>
                     <div className="flex w-full md:w-auto">
                         <input
@@ -64,10 +68,10 @@ export function Footer() {
                         <Link href="/" className="flex items-center space-x-3 group min-w-fit">
                             <Logo className="h-12 w-12" />
                             <span className="text-2xl md:text-3xl font-heading font-bold tracking-tight text-white">
-                                Happy<span className="text-coral">Journey</span>
+                                Happy <span className="text-coral">Journey</span>
                             </span>
                         </Link>
-                        <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+                        <p className="text-white/70 text-sm leading-relaxed max-w-xs">
                             Creating extraordinary travel experiences since 2015. We turn your travel dreams into reality with personalized planning and luxury care.
                         </p>
                         <div className="flex space-x-4">
@@ -85,7 +89,7 @@ export function Footer() {
                         <ul className="space-y-4">
                             {footerLinks.company.map(link => (
                                 <li key={link.name}>
-                                    <Link href={link.href} className="text-gray-400 hover:text-coral transition-colors text-sm">
+                                    <Link href={link.href} className="text-white/70 hover:text-coral transition-colors text-sm">
                                         {link.name}
                                     </Link>
                                 </li>
@@ -99,7 +103,7 @@ export function Footer() {
                         <ul className="space-y-4">
                             {footerLinks.support.map(link => (
                                 <li key={link.name}>
-                                    <Link href={link.href} className="text-gray-400 hover:text-coral transition-colors text-sm">
+                                    <Link href={link.href} className="text-white/70 hover:text-coral transition-colors text-sm">
                                         {link.name}
                                     </Link>
                                 </li>
@@ -115,19 +119,19 @@ export function Footer() {
                                 <div className="p-3 rounded-xl bg-white/5 group-hover:bg-coral transition-colors duration-300">
                                     <MapPin className="w-5 h-5 text-coral group-hover:text-white" />
                                 </div>
-                                <p className="text-gray-400 text-sm">Panigaon Chaiali PolyRoad,<br />Nagaon, Assam- 782003</p>
+                                <p className="text-white/70 text-sm">Panigaon Chaiali PolyRoad,<br />Nagaon, Assam- 782003</p>
                             </div>
                             <div className="flex items-center space-x-4 group">
                                 <div className="p-3 rounded-xl bg-white/5 group-hover:bg-coral transition-colors duration-300">
                                     <Phone className="w-5 h-5 text-coral group-hover:text-white" />
                                 </div>
-                                <p className="text-gray-400 text-sm font-bold">+91 60 262 84 181</p>
+                                <p className="text-white/80 text-sm font-bold">+91 60 262 84 181</p>
                             </div>
                             <div className="flex items-center space-x-4 group">
                                 <div className="p-3 rounded-xl bg-white/5 group-hover:bg-coral transition-colors duration-300">
                                     <Mail className="w-5 h-5 text-coral group-hover:text-white" />
                                 </div>
-                                <p className="text-gray-400 text-sm">info@happyjourney.net</p>
+                                <p className="text-white/70 text-sm">info@happyjourney.net</p>
                             </div>
                         </div>
                     </div>
@@ -136,8 +140,8 @@ export function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="mt-20 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-gray-400 text-xs">
-                        © 2025 HappyJourney. All rights reserved. Designed with ❤️ for travelers.
+                    <p className="text-white/65 text-xs">
+                        © 2026 HappyJourney. All rights reserved. Designed with ❤️ for travelers.
                     </p>
                     <button
                         onClick={scrollToTop}
