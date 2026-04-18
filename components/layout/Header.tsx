@@ -304,7 +304,7 @@ export function Header() {
                     {/* Mobile Menu Trigger */}
                     <button
                         onClick={() => setIsMobileMenuOpen(true)}
-                        className="lg:hidden relative z-[10001] p-2.5 rounded-full hover:bg-white/10 text-white transition-all"
+                        className={`lg:hidden relative z-[10001] p-2.5 rounded-full hover:bg-white/10 text-white transition-all ${isMobileMenuOpen ? 'opacity-0 pointer-events-none' : ''}`}
                     >
                         <Menu className="w-6 h-6" />
                     </button>
@@ -488,9 +488,10 @@ export function Header() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed inset-0 z-[10000] bg-gradient-to-b from-white via-[#f7f9fc] to-[#eef4fb] dark:from-dark-navy dark:via-[#071727] dark:to-[#0b2137] backdrop-blur-xl lg:hidden overflow-y-auto shadow-[0_40px_120px_-20px_rgba(0,0,0,0.75)]"
+                        className="fixed inset-0 z-[2147483647] h-[100dvh] w-screen bg-gradient-to-b from-white via-[#f7f9fc] to-[#eef4fb] dark:from-dark-navy dark:via-[#071727] dark:to-[#0b2137] backdrop-blur-xl lg:hidden overflow-y-auto shadow-[0_40px_120px_-20px_rgba(0,0,0,0.75)]"
                     >
                         <div className="flex flex-col min-h-full p-8 pt-24">
+                            <p className="mb-6 text-xs font-bold uppercase tracking-[0.24em] text-coral">Menu</p>
                             <div className="flex-1 space-y-8">
                                 {navigation.map((item) => (
                                     <div key={item.name} className="space-y-4">
@@ -510,7 +511,7 @@ export function Header() {
                                                             key={sub.name}
                                                             href={sub.href}
                                                             onClick={() => setIsMobileMenuOpen(false)}
-                                                            className="block text-gray-500 dark:text-gray-400 text-lg hover:text-coral"
+                                                            className="block text-gray-700 dark:text-white/75 text-lg hover:text-coral"
                                                         >
                                                             {sub.name}
                                                         </Link>
