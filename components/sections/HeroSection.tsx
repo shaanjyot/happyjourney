@@ -1,12 +1,202 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
-import { ChevronDown, Globe, Sunrise, Map, Palmtree, TowerControl, Search, X, Loader2, Calendar, Star, MapPin, Sparkles } from 'lucide-react'
+import { ChevronDown, Globe, Sunrise, Map, Palmtree, TowerControl, Search, X, Loader2, Calendar, Star, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { getTripRouteFromDestination } from '@/lib/trips-data'
+
+type AiSearchResult = {
+    locationName: string;
+    summary: string;
+    bestTimeToVisit: string;
+    highlights: string[];
+    itinerary: { day: string; activity: string }[];
+    suggestedImageSearchTerm: string;
+}
+
+type PuterClient = {
+    ai?: {
+        chat: (prompt: string, options?: { model?: string }) => Promise<unknown>;
+        txt2img: (
+            promptOrOptions: string | { prompt: string; [key: string]: unknown },
+            optionsOrTestMode?: boolean | { [key: string]: unknown }
+        ) => Promise<HTMLImageElement>;
+    };
+}
+
+declare global {
+    interface Window {
+        puter?: PuterClient;
+        __puterScriptLoadPromise?: Promise<void>;
+    }
+}
+
+const PUTER_SCRIPT_SRC = 'https://js.puter.com/v2/'
+const PUTER_MODEL_CANDIDATES = [
+    'gemma-4-26b-a4b-it',
+    'gemma-4-31b-it',
+    'google/gemma-4-26b-a4b-it',
+    'google/gemma-4-31b-it',
+]
+const PUTER_IMAGE_MODEL_CANDIDATES: Array<{ [key: string]: unknown }> = [
+    { provider: 'together', model: 'black-forest-labs/FLUX.1-schnell', width: 1280, height: 720 },
+    { provider: 'replicate-image-generation', model: 'black-forest-labs/flux-schnell', ratio: { w: 16, h: 9 } },
+]
+
+function extractTextFromPuterResponse(response: unknown) {
+    if (typeof response === 'string') {
+        return response
+    }
+
+    if (response && typeof response === 'object') {
+        const maybeMessage = (response as { message?: { content?: unknown } }).message
+        const content = maybeMessage?.content
+
+        if (typeof content === 'string') {
+            return content
+        }
+
+        if (Array.isArray(content)) {
+            const textParts = content
+                .map((part) => {
+                    if (typeof part === 'string') return part
+                    if (part && typeof part === 'object' && 'text' in part) {
+                        const text = (part as { text?: unknown }).text
+                        return typeof text === 'string' ? text : ''
+                    }
+                    return ''
+                })
+                .filter(Boolean)
+            if (textParts.length) {
+                return textParts.join('\n')
+            }
+        }
+    }
+
+    return JSON.stringify(response ?? '')
+}
+
+function parseAiSearchJson(rawText: string): AiSearchResult {
+    const cleaned = rawText.trim()
+    const fencedMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/i)
+    const firstBrace = cleaned.indexOf('{')
+    const lastBrace = cleaned.lastIndexOf('}')
+
+    const candidates = [
+        cleaned,
+        fencedMatch?.[1]?.trim(),
+        firstBrace !== -1 && lastBrace > firstBrace
+            ? cleaned.slice(firstBrace, lastBrace + 1).trim()
+            : undefined,
+    ].filter((value): value is string => Boolean(value))
+
+    for (const candidate of candidates) {
+        try {
+            return JSON.parse(candidate) as AiSearchResult
+        } catch {
+            // Try next candidate.
+        }
+    }
+
+    throw new Error('Puter response was not valid JSON.')
+}
+
+function loadPuterScript() {
+    if (typeof window === 'undefined') {
+        throw new Error('Puter can only be loaded in the browser.')
+    }
+
+    if (window.puter?.ai?.chat) {
+        return Promise.resolve()
+    }
+
+    if (window.__puterScriptLoadPromise) {
+        return window.__puterScriptLoadPromise
+    }
+
+    window.__puterScriptLoadPromise = new Promise<void>((resolve, reject) => {
+        const existingScript = document.querySelector<HTMLScriptElement>(`script[src="${PUTER_SCRIPT_SRC}"]`)
+        if (existingScript) {
+            existingScript.addEventListener('load', () => resolve(), { once: true })
+            existingScript.addEventListener('error', () => reject(new Error('Failed to load Puter.js script.')), { once: true })
+            return
+        }
+
+        const script = document.createElement('script')
+        script.src = PUTER_SCRIPT_SRC
+        script.async = true
+        script.onload = () => resolve()
+        script.onerror = () => reject(new Error('Failed to load Puter.js script.'))
+        document.head.appendChild(script)
+    })
+
+    return window.__puterScriptLoadPromise
+}
+
+async function chatWithPuterModelFallback(prompt: string) {
+    if (!window.puter?.ai?.chat) {
+        throw new Error('Puter AI is not available after loading script.')
+    }
+
+    let lastError: unknown = null
+
+    for (const model of PUTER_MODEL_CANDIDATES) {
+        try {
+            const response = await window.puter.ai.chat(prompt, { model })
+            return { response, model }
+        } catch (error) {
+            lastError = error
+            console.warn(`Puter model failed (${model})`, error)
+        }
+    }
+
+    throw lastError ?? new Error('All Puter Gemma model candidates failed.')
+}
+
+async function generateImageWithPuterFallback(prompt: string) {
+    if (!window.puter?.ai?.txt2img) {
+        throw new Error('Puter txt2img is not available after loading script.')
+    }
+
+    let lastError: unknown = null
+
+    for (const imageOptions of PUTER_IMAGE_MODEL_CANDIDATES) {
+        try {
+            const image = await window.puter.ai.txt2img(prompt, imageOptions)
+            if (image?.src) {
+                return image.src
+            }
+        } catch (error) {
+            lastError = error
+            console.warn('Puter txt2img candidate failed', imageOptions, error)
+        }
+    }
+
+    try {
+        const defaultImage = await window.puter.ai.txt2img(prompt)
+        if (defaultImage?.src) {
+            return defaultImage.src
+        }
+    } catch (error) {
+        lastError = error
+    }
+
+    throw lastError ?? new Error('All Puter txt2img model candidates failed.')
+}
+
+function formatDayHeading(day: unknown) {
+    const value = String(day ?? '').trim()
+    if (!value) return 'Day'
+    return /^day\b/i.test(value) ? value : `Day ${value}`
+}
+
+function formatDayBadge(day: unknown) {
+    return formatDayHeading(day).replace(/^day\s+/i, 'Day\n')
+}
 
 const heroImages = [
     '/hero-bg.png',
@@ -27,7 +217,12 @@ export function HeroSection() {
 
     const [searchValue, setSearchValue] = useState('')
     const [isSearching, setIsSearching] = useState(false)
-    const [aiResult, setAiResult] = useState<any>(null)
+    const [aiResult, setAiResult] = useState<AiSearchResult | null>(null)
+    const [aiModelUsed, setAiModelUsed] = useState<string | null>(null)
+    const [aiHeroImageUrl, setAiHeroImageUrl] = useState<string | null>(null)
+    const [itineraryImageUrls, setItineraryImageUrls] = useState<string[]>([])
+    const [visibleItineraryIndices, setVisibleItineraryIndices] = useState<number[]>([])
+    const itineraryCardRefs = useRef<Array<HTMLDivElement | null>>([])
     const [displayText, setDisplayText] = useState('')
     const [isDeleting, setIsDeleting] = useState(false)
     const [destIndex, setDestIndex] = useState(0)
@@ -79,20 +274,138 @@ export function HeroSection() {
         return () => clearTimeout(timeout)
     }, [charIndex, isDeleting, destIndex])
 
+    useEffect(() => {
+        if (!aiResult) {
+            setAiHeroImageUrl(null)
+            setItineraryImageUrls([])
+            setVisibleItineraryIndices([])
+            itineraryCardRefs.current = []
+            return
+        }
+
+        setItineraryImageUrls(Array.from({ length: aiResult.itinerary.length }, () => ''))
+        setVisibleItineraryIndices([0])
+
+        let cancelled = false
+
+        const generateHeroImage = async () => {
+            try {
+                await loadPuterScript()
+                const heroPrompt = `cinematic luxury travel destination photo of ${aiResult.locationName}, golden hour, ultra detailed`
+                const heroImage = await generateImageWithPuterFallback(heroPrompt)
+                if (!cancelled) {
+                    setAiHeroImageUrl(heroImage)
+                }
+            } catch (error) {
+                console.error('Failed to generate hero image with Puter txt2img:', error)
+                if (!cancelled) {
+                    setAiHeroImageUrl(null)
+                }
+            }
+        }
+
+        generateHeroImage()
+
+        return () => {
+            cancelled = true
+        }
+    }, [aiResult])
+
+    useEffect(() => {
+        if (!aiResult) return
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const newlyVisible = entries
+                    .filter((entry) => entry.isIntersecting)
+                    .map((entry) => Number((entry.target as HTMLElement).dataset.itineraryIndex))
+                    .filter((index) => Number.isInteger(index))
+
+                if (!newlyVisible.length) return
+
+                setVisibleItineraryIndices((prev) => Array.from(new Set([...prev, ...newlyVisible])))
+            },
+            { root: null, rootMargin: '150px 0px', threshold: 0.1 }
+        )
+
+        itineraryCardRefs.current.forEach((element) => {
+            if (element) observer.observe(element)
+        })
+
+        return () => observer.disconnect()
+    }, [aiResult, itineraryImageUrls.length])
+
+    useEffect(() => {
+        if (!aiResult || !visibleItineraryIndices.length) return
+
+        let cancelled = false
+
+        const generateVisibleItineraryImages = async () => {
+            try {
+                await loadPuterScript()
+
+                for (const index of visibleItineraryIndices) {
+                    if (cancelled) break
+                    if (itineraryImageUrls[index]) continue
+
+                    const itineraryItem = aiResult.itinerary[index]
+                    if (!itineraryItem) continue
+
+                    try {
+                        const prompt = `travel editorial photo in ${aiResult.locationName}, ${itineraryItem.activity}, premium tourism, detailed, natural lighting, day ${index + 1}`
+                        const imageUrl = await generateImageWithPuterFallback(prompt)
+                        if (!cancelled) {
+                            setItineraryImageUrls((prev) => {
+                                if (prev[index]) return prev
+                                const next = [...prev]
+                                next[index] = imageUrl
+                                return next
+                            })
+                        }
+                    } catch (error) {
+                        console.error(`Failed to generate itinerary image ${index + 1}:`, error)
+                    }
+                }
+            } catch (error) {
+                console.error('Failed preparing Puter txt2img for lazy itinerary generation:', error)
+            }
+        }
+
+        generateVisibleItineraryImages()
+
+        return () => {
+            cancelled = true
+        }
+    }, [aiResult, visibleItineraryIndices, itineraryImageUrls])
+
     const handleSearch = async (e?: React.FormEvent) => {
         if (e) e.preventDefault()
         if (!searchValue.trim()) return
 
         setIsSearching(true)
         try {
-            const response = await fetch('/api/ai/search', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: searchValue })
-            })
-            const data = await response.json()
-            if (data.error) throw new Error(data.error)
-            setAiResult(data)
+            await loadPuterScript()
+
+            const prompt = `
+You are a professional luxury travel planner for HappyJourney.
+Return ONLY valid JSON. No markdown, no extra text.
+Required keys:
+"locationName", "summary", "bestTimeToVisit",
+"highlights" (array of 5 points),
+"itinerary" (array of 5 objects with "day" and "activity"),
+"suggestedImageSearchTerm".
+
+Create a premium 3-5 day travel plan for: ${searchValue.trim()}
+            `.trim()
+
+            const { response: rawResponse, model } = await chatWithPuterModelFallback(prompt)
+            const rawText = extractTextFromPuterResponse(rawResponse)
+            const parsed = parseAiSearchJson(rawText)
+            setAiResult(parsed)
+            setAiModelUsed(model)
+            setAiHeroImageUrl(null)
+            setItineraryImageUrls([])
+            setVisibleItineraryIndices([])
         } catch (error) {
             console.error('Search failed:', error)
         } finally {
@@ -296,19 +609,38 @@ export function HeroSection() {
                                 <div className="relative h-[300px] md:h-[450px] bg-gradient-to-br from-coral/20 to-purple-900/20">
                                     <div
                                         className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-60"
-                                        style={{ backgroundImage: `url('https://source.unsplash.com/1600x900/?${aiResult.suggestedImageSearchTerm || aiResult.locationName}')` }}
+                                        style={aiHeroImageUrl ? { backgroundImage: `url('${aiHeroImageUrl}')` } : undefined}
                                     />
+                                    {!aiHeroImageUrl && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-white/5">
+                                            <Loader2 className="w-6 h-6 text-coral/80 animate-spin" />
+                                        </div>
+                                    )}
                                     <div className="absolute inset-0 bg-gradient-to-t from-dark-navy via-transparent to-transparent" />
                                     <button
-                                        onClick={() => setAiResult(null)}
+                                        onClick={() => {
+                                            setAiResult(null)
+                                            setAiModelUsed(null)
+                                            setAiHeroImageUrl(null)
+                                            setItineraryImageUrls([])
+                                        }}
                                         className="absolute top-8 right-8 p-4 bg-white/10 rounded-full hover:bg-coral text-white transition-all z-20 backdrop-blur-md"
                                     >
                                         <X className="w-6 h-6" />
                                     </button>
                                     <div className="absolute bottom-12 left-12 space-y-4">
-                                        <div className="flex items-center space-x-2 px-4 py-2 bg-coral/20 border border-coral/30 rounded-full w-fit">
-                                            <Sparkles className="w-4 h-4 text-coral" />
-                                            <span className="text-xs font-bold text-coral uppercase tracking-widest">AI Crafted Preview</span>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <div className="flex items-center space-x-2 px-4 py-2 bg-coral/20 border border-coral/30 rounded-full w-fit">
+                                                <Sparkles className="w-4 h-4 text-coral" />
+                                                <span className="text-xs font-bold text-coral uppercase tracking-widest">AI Crafted Preview</span>
+                                            </div>
+                                            {aiModelUsed && (
+                                                <div className="px-3 py-2 bg-white/10 border border-white/20 rounded-full">
+                                                    <span className="text-[11px] font-semibold text-white/90 tracking-wide">
+                                                        Model: {aiModelUsed}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                         <h2 className="text-5xl md:text-7xl font-serif font-bold text-white">{aiResult.locationName}</h2>
                                         <p className="text-xl md:text-2xl text-white/80 font-light italic max-w-2xl">{aiResult.summary}</p>
@@ -326,17 +658,48 @@ export function HeroSection() {
                                             <p className="text-gray-400 font-medium">Best time to visit: <span className="text-white">{aiResult.bestTimeToVisit}</span></p>
 
                                             <div className="space-y-8 mt-10">
-                                                {aiResult.itinerary?.map((item: any, idx: number) => (
-                                                    <div key={idx} className="relative pl-10 border-l-2 border-coral/30">
-                                                        <div className="absolute -left-3 top-0 w-6 h-6 rounded-full bg-coral flex items-center justify-center">
-                                                            <span className="text-[10px] font-bold text-white">{item.day}</span>
+                                                {aiResult.itinerary?.map((item: { day: string; activity: string }, idx: number) => {
+                                                    const dayHeading = formatDayHeading(item.day)
+                                                    const dayBadge = formatDayBadge(item.day)
+
+                                                    return (
+                                                        <div
+                                                            key={idx}
+                                                            ref={(element) => {
+                                                                itineraryCardRefs.current[idx] = element
+                                                            }}
+                                                            data-itinerary-index={idx}
+                                                            className="relative pl-12 border-l-2 border-coral/30 space-y-4"
+                                                        >
+                                                            <div className="absolute -left-5 top-0 w-10 h-10 rounded-full bg-coral flex items-center justify-center">
+                                                                <span className="text-[9px] font-bold text-white leading-tight text-center whitespace-pre-line px-1">
+                                                                    {dayBadge}
+                                                                </span>
+                                                            </div>
+                                                        <div className="overflow-hidden rounded-2xl border border-white/10">
+                                                            {itineraryImageUrls[idx] ? (
+                                                                <Image
+                                                                    src={itineraryImageUrls[idx]}
+                                                                    alt={`${aiResult.locationName} itinerary day ${idx + 1}`}
+                                                                    loading="lazy"
+                                                                    width={1200}
+                                                                    height={800}
+                                                                    unoptimized
+                                                                    className="h-40 w-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="h-40 w-full bg-white/5 flex items-center justify-center">
+                                                                    <Loader2 className="w-5 h-5 text-coral/80 animate-spin" />
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div className="space-y-2">
-                                                            <h4 className="text-xl font-bold text-white">Day {item.day}</h4>
+                                                            <h4 className="text-xl font-bold text-white">{dayHeading}</h4>
                                                             <p className="text-gray-400 leading-relaxed">{item.activity}</p>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                        </div>
+                                                    )
+                                                })}
                                             </div>
                                         </section>
                                     </div>
@@ -368,7 +731,12 @@ export function HeroSection() {
                                             <Button
                                                 variant="outline"
                                                 className="w-full py-8 text-lg border-white/10 text-white rounded-[24px] hover:bg-white/10"
-                                                onClick={() => setAiResult(null)}
+                                                onClick={() => {
+                                                    setAiResult(null)
+                                                    setAiModelUsed(null)
+                                                    setAiHeroImageUrl(null)
+                                                    setItineraryImageUrls([])
+                                                }}
                                             >
                                                 Keep Exploring
                                             </Button>

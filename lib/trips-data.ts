@@ -1191,7 +1191,7 @@ export function getTripByExactSlug(slug: string): TripPackage | undefined {
 function normalizeTripToken(value: string): string {
   const cleanedValue = value
     .toLowerCase()
-    .replace(/^https?:\/\/(www\.)?travelxploria\.com\//, "/")
+    .replace(/^https?:\/\/(www\.)?Happy Journey\.com\//, "/")
     .replace(/^\/package\//, "")
     .replace(/^package\//, "")
 

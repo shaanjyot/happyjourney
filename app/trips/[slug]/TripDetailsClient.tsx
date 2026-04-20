@@ -30,7 +30,7 @@ export function TripDetailsClient({ trip }: TripDetailsClientProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-[#062b56]/65 via-[#0a3f70]/30 to-[#18643b]/35 z-10" />
           <Image src={trip.gallery[0]} alt={trip.title} fill className="object-cover" />
           <div className="relative z-20 px-8 md:px-14 py-16 md:py-20 text-white">
-            <p className="text-xs md:text-sm font-bold tracking-[0.2em] uppercase text-yellow-mid">TravelXploria Inspired Package</p>
+            <p className="text-xs md:text-sm font-bold tracking-[0.2em] uppercase text-yellow-mid">Happy Journey Inspired Package</p>
             <h1 className="text-4xl md:text-5xl font-heading font-bold mt-2">{trip.title}</h1>
             <div className="mt-6 flex flex-wrap gap-3">
               <span className="px-4 py-2 rounded-full bg-white/15 border border-white/30 text-sm font-semibold inline-flex items-center gap-2">
